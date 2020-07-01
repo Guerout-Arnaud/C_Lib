@@ -94,6 +94,8 @@ logger_t *create_logger(bool std_output, bool file, char *file_path, bool debug)
 void delete_logger(logger_t *logger)
 {
     if (logger != NULL) {
+        if (logger->fd != -1)
+            close(logger->fd);
         if (logger->msg != NULL)
             free(logger->msg);
         free(logger);
