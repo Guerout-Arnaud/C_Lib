@@ -36,16 +36,17 @@ LIB_DIR =	../..
 
 OUTPUT_DIR = $(LIB_DIR)/output
 
-SRC_DIR = 	$(LIB_DIR)/src/logger
+SRC_DIR = 	$(LIB_DIR)/src/linked_list
 
-SRC	=	$(SRC_DIR)/init.c	\
-		$(SRC_DIR)/print.c	\
+SRC	=	$(SRC_DIR)/add_del.c	\
+		$(SRC_DIR)/init_len.c	\
+		$(SRC_DIR)/prev_next_idx.c	\
 
 # ======= #
 #  FLAGS  #
 # ======= #
 
-cflags.common	:=	-W -Wall -Wextra -Wno-unused-variable -pedantic -D_GNU_SOURCE -I$(LIB_DIR)/include/logger
+cflags.common	:=	-W -Wall -Wextra -Wno-unused-variable -pedantic -D_GNU_SOURCE -I$(LIB_DIR)/include/linked_list
 cflags.debug	:=	-g -g3
 cflags.release	:=
 cflags.tests	:=
@@ -62,7 +63,7 @@ OBJ	=	$(SRC:.c=.o)
 #  LIB NAME  #
 # ========== #
 
-NAME	=	log
+NAME	=	linked_list
 
 # ======= #
 #  RULES  #

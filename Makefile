@@ -36,7 +36,7 @@ LIB_DIR =	.
 
 MAKEFILES_DIR = $(LIB_DIR)/Makefiles
 
-LIBS_MAKEFILES_DIR	=	$(MAKEFILES_DIR)/	\
+LIBS_MAKEFILES_DIR	=	$(MAKEFILES_DIR)/linked_list	\
 
 # ========== #
 #  LIB NAME  #
