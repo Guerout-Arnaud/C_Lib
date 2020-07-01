@@ -32,6 +32,9 @@ To see a full detailed list of available type of logs and how they can be combin
 Here is all outputs you can have :
 ![][Logger_Gif]
 
+[ReadMe_Logger]: ./Docs/README_logger.md
+[Logger_Gif]: https://s7.gifyu.com/images/lib_logger.gif
+
 # Epitech Students
 You are free to use this library as you want. A special branch has been created in which the [Epitech][Epitech_WebSite] [Coding Style][Epitech_WebSite] will be respected. I don't hav time to check new [Coding Style][Epitech_CodingStyle] every years. If you find a norm error, please fix it and send a ``pull request`` or, if you can't figure how to fix it, message me with the **file(s)**, **line(s)**  and **type(s)** of error(s).  
 
