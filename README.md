@@ -4,7 +4,41 @@ C Library to simplify use multiple things
 ## Description
 This library is composed of multiples mudules that i build when i need them. Each of the module is independent (except if the opposite isn't say in it's part) and has it's own git branch.
 
+# Linked_List
+This Module allow you to easily use linked list.
 
+## Usage
+All you need to do in order to use it is creating your structure with the library one in it like so :
+```C
+struct example {
+    /* Your Datas */
+
+    struct linked_list head;
+    /* OR */
+    linked_list_t head;
+};
+```
+
+Make sure to replace ``<field_name>`` by whatever you want.  
+Once this is done, call the function you need by sending :  
+* A pointer to your structure (Here a ``struct example *``) when ``element``, ``list``, ``add`` or ``del`` is asked.
+* The name of your field (Here ``head``) when ``field`` is asked
+* An ``int`` (for exemple ``5``) just like you would do with a tab when ``idx`` is asked   
+
+Warning, this lib DOES NOT (yet) ``free`` your structure. In order to do so, here is a function you can use :
+```C
+void free_my_list(struct example *my_list)
+{
+    for (struct example *next = NULL; my_list != NULL; my_list = next) {
+        next = list_next(my_list, head);
+
+        /* Free datas that are in your structure*/
+
+        free(my_list);
+    }
+    return;
+}
+```
 
 # Log
 This Module allow you to easily create lots of differents types of logs in both terminal **and**/**or** file depending of you needs
