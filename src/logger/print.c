@@ -42,11 +42,11 @@ int get_log_type_str_idx(log_type_t type)
     log_type_t found_type = 1;
 
     if (type <= 0)
-        type = UNKNOWN;
+        type = LOG_UNKNOWN;
     for (found_type = 1; found_type < type;
         found_type = found_type << 1, pow++);
     if (found_type != type) {
-        type = UNKNOWN;
+        type = LOG_UNKNOWN;
         for (found_type = 1; found_type < type;
             found_type = found_type << 1, pow++);
     }
@@ -59,21 +59,21 @@ static char *build_log_print_message(logger_t *logger, log_type_t type, int nb)
     char *time_str = log_time();
     int bytes = 0;
 
-    if (nb < 0 || type > (DEBUG | ERROR))
+    if (nb < 0 || type > (LOG_DEBUG | LOG_ERROR))
         return (NULL_MSG);
-    if (type < DEBUG) {
+    if (type < LOG_DEBUG) {
         bytes = asprintf(&msg, "%s%s%s", time_str,
             LOG_TYPE_PRINT[get_log_type_str_idx(type)], logger->msg);
     } else {
         bytes = asprintf(&msg, "%s%s%s%s",  time_str,
-            LOG_TYPE_PRINT[get_log_type_str_idx(DEBUG)],
-            LOG_TYPE_PRINT[get_log_type_str_idx(type - DEBUG)], logger->msg);
+            LOG_TYPE_PRINT[get_log_type_str_idx(LOG_DEBUG)],
+            LOG_TYPE_PRINT[get_log_type_str_idx(type - LOG_DEBUG)], logger->msg);
     }
     if (bytes < 0)
         msg = logger->msg;
     if (time_str != NULL && time_str != UNKNOWN_TIME)
         free(time_str);
-    if (msg == NULL && type < DEBUG)
+    if (msg == NULL && type < LOG_DEBUG)
         msg = NULL_MSG;
     return (msg);
 }
@@ -84,21 +84,21 @@ static char *build_log_file_message(logger_t *logger, log_type_t type, int nb)
     char *time_str = log_time();
     int bytes = 0;
 
-    if (nb < 0 || type > (DEBUG | ERROR))
+    if (nb < 0 || type > (LOG_DEBUG | LOG_ERROR))
         return (NULL_MSG);
-    if (type < DEBUG) {
+    if (type < LOG_DEBUG) {
         bytes = asprintf(&msg, "%s%s%s", time_str,
             LOG_TYPE_FILE[get_log_type_str_idx(type)], logger->msg);
     } else {
         bytes = asprintf(&msg, "%s%s%s%s",  time_str,
-            LOG_TYPE_FILE[get_log_type_str_idx(DEBUG)],
-            LOG_TYPE_FILE[get_log_type_str_idx(type - DEBUG)], logger->msg);
+            LOG_TYPE_FILE[get_log_type_str_idx(LOG_DEBUG)],
+            LOG_TYPE_FILE[get_log_type_str_idx(type - LOG_DEBUG)], logger->msg);
     }
     if (bytes < 0)
         msg = logger->msg;
     if (time_str != NULL && time_str != UNKNOWN_TIME)
         free(time_str);
-    if (msg == NULL && type < DEBUG)
+    if (msg == NULL && type < LOG_DEBUG)
         msg = NULL_MSG;
     return (msg);
 }
@@ -108,7 +108,7 @@ void log_msg(logger_t *logger, log_type_t type, int nb)
     char *print = NULL;
     char *file = NULL;
 
-    if (logger == NULL || (logger->debug == false && type >= DEBUG))
+    if (logger == NULL || (logger->debug == false && type >= LOG_DEBUG))
         return;
     if (logger->std_output == true) {
         print = build_log_print_message(logger, type, nb);

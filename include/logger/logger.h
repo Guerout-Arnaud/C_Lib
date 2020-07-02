@@ -30,12 +30,12 @@
     #define KO(msg) BOLD(RED(msg))
 
     typedef enum log_type_e {
-        NONE = 1,
-        INFO = 2,
-        WARN = 4,
-        ERROR = 8,
-        DEBUG = 16,
-        UNKNOWN = 32
+        LOG_NONE = 1,
+        LOG_INFO = 2,
+        LOG_WARN = 4,
+        LOG_ERROR = 8,
+        LOG_DEBUG = 16,
+        LOG_UNKNOWN = 32
     } log_type_t;
 
     typedef struct logger_s {
