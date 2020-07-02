@@ -28,19 +28,19 @@ int main (int argc, char **argv)
 
     printf("\n");
 
-    log_msg(logger, NONE, asprintf(&logger->msg, "Test None\n"));
-    log_msg(logger, INFO, asprintf(&logger->msg, "Test Info\n"));
-    log_msg(logger, WARN, asprintf(&logger->msg, "Test Warn\n"));
-    log_msg(logger, ERROR, asprintf(&logger->msg, "Test Error\n"));
-    log_msg(logger, DEBUG, asprintf(&logger->msg, "Test Debug (Alone)\n"));
+    log_msg(logger, LOG_NONE, asprintf(&logger->msg, "Test None\n"));
+    log_msg(logger, LOG_INFO, asprintf(&logger->msg, "Test Info\n"));
+    log_msg(logger, LOG_WARN, asprintf(&logger->msg, "Test Warn\n"));
+    log_msg(logger, LOG_ERROR, asprintf(&logger->msg, "Test Error\n"));
+    log_msg(logger, LOG_DEBUG, asprintf(&logger->msg, "Test Debug (Alone)\n"));
 
     printf("\n");
 
-    log_msg(logger, DEBUG | NONE, asprintf(&logger->msg, "Test Debug (None)\n"));
-    log_msg(logger, DEBUG | INFO, asprintf(&logger->msg, "Test Debug (Info)\n"));
-    log_msg(logger, DEBUG | WARN, asprintf(&logger->msg, "Test Debug (Warn)\n"));
-    log_msg(logger, DEBUG | ERROR, asprintf(&logger->msg, "Test Debug (Error)\n"));
-    log_msg(logger, DEBUG | DEBUG, asprintf(&logger->msg, "Test Debug (Debug)\n"));
+    log_msg(logger, LOG_DEBUG | LOG_NONE, asprintf(&logger->msg, "Test Debug (None)\n"));
+    log_msg(logger, LOG_DEBUG | LOG_INFO, asprintf(&logger->msg, "Test Debug (Info)\n"));
+    log_msg(logger, LOG_DEBUG | LOG_WARN, asprintf(&logger->msg, "Test Debug (Warn)\n"));
+    log_msg(logger, LOG_DEBUG | LOG_ERROR, asprintf(&logger->msg, "Test Debug (Error)\n"));
+    log_msg(logger, LOG_DEBUG | LOG_DEBUG, asprintf(&logger->msg, "Test Debug (Debug)\n"));
 
     printf("\n");
 
