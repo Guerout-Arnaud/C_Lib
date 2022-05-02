@@ -67,7 +67,7 @@ static char *build_log_print_message(logger_t *logger, log_type_t type, int nb)
     } else {
         bytes = asprintf(&msg, "%s%s%s%s",  time_str,
             LOG_TYPE_PRINT[get_log_type_str_idx(LOG_DEBUG)],
-            LOG_TYPE_PRINT[get_log_type_str_idx(type - LOG_DEBUG)], logger->msg);
+            LOG_TYPE_PRINT[get_log_type_str_idx(type & ~LOG_DEBUG)], logger->msg);
     }
     if (bytes < 0)
         msg = logger->msg;
@@ -108,8 +108,14 @@ void log_msg(logger_t *logger, log_type_t type, int nb)
     char *print = NULL;
     char *file = NULL;
 
-    if (logger == NULL || (logger->debug == false && type >= LOG_DEBUG))
+    if (logger == NULL)
         return;
+    if (logger->debug == false && type >= LOG_DEBUG) {
+        if (logger->msg != NULL)
+            free(logger->msg);
+        logger->msg = NULL;
+        return;
+    }
     if (logger->std_output == true) {
         print = build_log_print_message(logger, type, nb);
         dprintf(1, "%s", print);
