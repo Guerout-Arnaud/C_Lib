@@ -22,7 +22,7 @@
     } linked_list_t;
 
     #define list_init(element, field) \
-    ({ \
+    __extension__ ({ \
         typeof(element) _list_rtn = element; \
 \
         if (_list_rtn != NULL) { \
@@ -32,7 +32,7 @@
     })
 
     #define list_len(list, field) \
-    ({ \
+    __extension__ ({ \
         int _list_rtn = 0; \
 \
         if (list != NULL) { \
@@ -42,7 +42,7 @@
     })
 
     #define list_prev(list, field) \
-    ({ \
+    __extension__ ({ \
         typeof(list) _list_rtn = list; \
         linked_list_t *_list_head = NULL; \
 \
@@ -57,7 +57,7 @@
     })
 
     #define list_next(list, field) \
-    ({ \
+    __extension__ ({ \
         typeof(list) _list_rtn = list; \
         linked_list_t *_list_head = NULL; \
 \
@@ -72,7 +72,7 @@
     })
 
     #define list_idx(list, field, idx) \
-    ({ \
+    __extension__ ({ \
         typeof(list) _list_rtn = list; \
         linked_list_t *_list_head = NULL; \
 \
@@ -87,7 +87,7 @@
     })
 
     #define list_add(list, add, field) \
-    ({ \
+    __extension__ ({ \
         typeof(list) _list_rtn = list; \
 \
         if (_list_rtn != NULL && add != NULL) \
@@ -98,7 +98,7 @@
     })
 
     #define list_del(list, del, field) \
-    ({ \
+    __extension__ ({ \
         typeof(list) _list_rtn = list; \
         linked_list_t *_list_head = NULL; \
 \
@@ -111,5 +111,6 @@
         } \
         _list_rtn; \
     })
+
 
 #endif
