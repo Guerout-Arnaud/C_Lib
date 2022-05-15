@@ -10,126 +10,98 @@
 **
 */
 
-#include <stddef.h>
-#include <stdbool.h>
+#include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 #include <time.h>
-#include "logger.h"
-#include "logger_constants.h"
 
-static char *log_time(void)
+#include <pthread.h>
+#include <unistd.h>
+
+#include "logger_constants.h"
+#include "logger.h"
+
+extern logger_t logger;
+
+static char *get_time_str(char *time_str)
 {
     struct tm gmt = {0};
     time_t elapsed = time(NULL);
-    char *str = NULL;
+    int test = 0;
 
-    if (&gmt != gmtime_r(&elapsed, &gmt))
-        return (UNKNOWN_TIME);
-    if (asprintf(&str, "[%04d/%02d/%02d %02d:%02d:%02d] ",
+    if (&gmt != gmtime_r(&elapsed, &gmt) ||
+        (test = snprintf(time_str, LOG_TIME_STR_LEN + 1, "[%04d/%02d/%02d %02d:%02d:%02d]",
         gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday,
-        gmt.tm_hour, gmt.tm_min, gmt.tm_sec) != 22) {
-        if (str != NULL)
-            free(str);
-        return (UNKNOWN_TIME);
+        gmt.tm_hour, gmt.tm_min, gmt.tm_sec)) != (int) LOG_TIME_STR_LEN)
+    {
+        strcpy(time_str, UNKNOWN_TIME);
     }
-    return (str);
+
+    return (time_str);
 }
 
-int get_log_type_str_idx(log_type_t type)
+static int get_type_idx(log_type_t type)
 {
-    int pow = 0;
-    log_type_t found_type = 1;
+    int idx = 0;
+    log_type_t found_type = LOG_NONE;
 
     if (type <= 0)
         type = LOG_UNKNOWN;
-    for (found_type = 1; found_type < type;
-        found_type = found_type << 1, pow++);
+
+    for (found_type = 1; found_type < type; found_type = found_type << 1, idx++);
+
     if (found_type != type) {
         type = LOG_UNKNOWN;
-        for (found_type = 1; found_type < type;
-            found_type = found_type << 1, pow++);
+        for (found_type = 1; found_type < type; found_type = found_type << 1, idx++);
     }
-    return (pow);
+
+    return (idx);
 }
 
-static char *build_log_print_message(logger_t *logger, log_type_t type, int nb)
+void log_msg(log_type_t type, char *format, ...)
 {
-    char *msg = NULL;
-    char *time_str = log_time();
-    int bytes = 0;
-
-    if (nb < 0 || type > (LOG_DEBUG | LOG_ERROR))
-        return (NULL_MSG);
-    if (type < LOG_DEBUG) {
-        bytes = asprintf(&msg, "%s%s%s", time_str,
-            LOG_TYPE_PRINT[get_log_type_str_idx(type)], logger->msg);
-    } else {
-        bytes = asprintf(&msg, "%s%s%s%s",  time_str,
-            LOG_TYPE_PRINT[get_log_type_str_idx(LOG_DEBUG)],
-            LOG_TYPE_PRINT[get_log_type_str_idx(type & ~LOG_DEBUG)], logger->msg);
-    }
-    if (bytes < 0)
-        msg = logger->msg;
-    if (time_str != NULL && time_str != UNKNOWN_TIME)
-        free(time_str);
-    if (msg == NULL && type < LOG_DEBUG)
-        msg = NULL_MSG;
-    return (msg);
-}
-
-static char *build_log_file_message(logger_t *logger, log_type_t type, int nb)
-{
-    char *msg = NULL;
-    char *time_str = log_time();
-    int bytes = 0;
-
-    if (nb < 0 || type > (LOG_DEBUG | LOG_ERROR))
-        return (NULL_MSG);
-    if (type < LOG_DEBUG) {
-        bytes = asprintf(&msg, "%s%s%s", time_str,
-            LOG_TYPE_FILE[get_log_type_str_idx(type)], logger->msg);
-    } else {
-        bytes = asprintf(&msg, "%s%s%s%s",  time_str,
-            LOG_TYPE_FILE[get_log_type_str_idx(LOG_DEBUG)],
-            LOG_TYPE_FILE[get_log_type_str_idx(type - LOG_DEBUG)], logger->msg);
-    }
-    if (bytes < 0)
-        msg = logger->msg;
-    if (time_str != NULL && time_str != UNKNOWN_TIME)
-        free(time_str);
-    if (msg == NULL && type < LOG_DEBUG)
-        msg = NULL_MSG;
-    return (msg);
-}
-
-void log_msg(logger_t *logger, log_type_t type, int nb)
-{
-    char *print = NULL;
-    char *file = NULL;
-
-    if (logger == NULL)
-        return;
-    if (logger->debug == false && type >= LOG_DEBUG) {
-        if (logger->msg != NULL)
-            free(logger->msg);
-        logger->msg = NULL;
+    if (logger.debug == false && type & LOG_DEBUG) {
         return;
     }
-    if (logger->std_output == true) {
-        print = build_log_print_message(logger, type, nb);
-        dprintf(1, "%s", print);
+
+    char time_str[LOG_TIME_STR_LEN + 1] = {0};
+    int debug = 0;
+    va_list args = {0};
+
+    va_start(args, format);
+
+    get_time_str(time_str);
+
+    if (type & LOG_DEBUG) {
+        debug = get_type_idx(LOG_DEBUG);
+        type = type & ~LOG_DEBUG;
     }
-    if (logger->fd > -1) {
-        file = build_log_file_message(logger, type, nb);
-        dprintf(logger->fd, "%s", file);
+
+    if (logger.thread == true) {
+        pthread_mutex_lock(&logger.mutex);
     }
-    if (print != NULL_MSG && print != logger->msg)
-        free(print);
-    if (file != NULL_MSG && file != logger->msg)
-        free(file);
-    if (logger->msg != NULL)
-        free(logger->msg);
-    logger->msg = NULL;
-    return;
+
+    for (int i = 0; i < logger.fds_len; i++) {
+        if (logger.fds[i] == stdout) {
+            FILE *output = NULL;
+            if (type & LOG_WARN || type & LOG_ERROR) {
+                output = stderr;
+            } else {
+                output = stdout;
+            }
+            fprintf(output, "%s %s%s", time_str, LOG_TYPE_PRINT[debug], LOG_TYPE_PRINT[get_type_idx(type)]);
+            vfprintf(output, format, args);
+            fflush(output);
+        } else {
+            fprintf(logger.fds[i], "%s %s%s", time_str, LOG_TYPE_FILE[debug], LOG_TYPE_FILE[get_type_idx(type)]);
+            vfprintf(logger.fds[i], format, args);
+            fflush(logger.fds[i]);
+        }
+    }
+
+    if (logger.thread == true) {
+        pthread_mutex_unlock(&logger.mutex);
+    }
+
+    va_end(args);
 }

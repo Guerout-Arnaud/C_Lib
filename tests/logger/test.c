@@ -7,6 +7,15 @@
 
 #include "logger.h"
 
+extern logger_t logger;
+
+void *logger_thread(void *arg)
+{
+    (void) arg;
+    log_msg(LOG_INFO, "logger_thread()\n");
+    return (NULL);
+}
+
 int main (int argc, char **argv)
 {
     printf("\n");
@@ -16,39 +25,74 @@ int main (int argc, char **argv)
     printf("\n");
 
     printf("Creating logger...\n");
-    logger_t *logger = create_logger(true, true, argv[1], true);
+    if (logger_init(true, true, true) != 0) {
+        printf("ERROR: Logger not created\n");
+        return (-1);
+    }
     printf("Logger created\n");
 
     printf("\n");
 
-    printf("Logger : %p\n", logger);
-    printf("FD : %d\n", logger->fd);
-    printf("Std_Output : %d\n", logger->std_output);
-    printf("Message : %p\n\t%s\n", logger->msg, logger->msg);
+    printf("Adding file to logger...\n");
+    if (logger_add_filename(argv[1]) != 0) {
+        printf("ERROR: File not added\n");
+        return (-1);
+    }
+    printf("File added to logger\n");
+
+    // logger_t *logger = create_logger(true, true, argv[1], true);
 
     printf("\n");
 
-    log_msg(logger, LOG_NONE, asprintf(&logger->msg, "Test None\n"));
-    log_msg(logger, LOG_INFO, asprintf(&logger->msg, "Test Info\n"));
-    log_msg(logger, LOG_WARN, asprintf(&logger->msg, "Test Warn\n"));
-    log_msg(logger, LOG_ERROR, asprintf(&logger->msg, "Test Error\n"));
-    log_msg(logger, LOG_DEBUG, asprintf(&logger->msg, "Test Debug (Alone)\n"));
+    printf("FDs: [");
+    for (int i = 0; i < logger.fds_len; i++) {
+        if (logger.fds[i] == stdout) {
+            printf("stdout");
+        } else {
+            printf("%d", fileno(logger.fds[i]));
+        }
+        if (i != logger.fds_len - 1) {
+            printf(", ");
+        }
+    }
+    printf("]\n");
 
     printf("\n");
 
-    log_msg(logger, LOG_DEBUG | LOG_NONE, asprintf(&logger->msg, "Test Debug (None)\n"));
-    log_msg(logger, LOG_DEBUG | LOG_INFO, asprintf(&logger->msg, "Test Debug (Info)\n"));
-    log_msg(logger, LOG_DEBUG | LOG_WARN, asprintf(&logger->msg, "Test Debug (Warn)\n"));
-    log_msg(logger, LOG_DEBUG | LOG_ERROR, asprintf(&logger->msg, "Test Debug (Error)\n"));
-    log_msg(logger, LOG_DEBUG | LOG_DEBUG, asprintf(&logger->msg, "Test Debug (Debug)\n"));
+    printf("Threads...\n");
+    pthread_t thread = 0;
+
+    pthread_create(&thread, NULL, logger_thread, NULL);
+
+    log_msg(LOG_INFO, "main()\n");
+
+    pthread_join(thread, NULL);
+    printf("Joined\n");
+
+    printf("\n");
+
+    log_msg(LOG_NONE, "Test None\n");
+    log_msg(LOG_INFO, "Test Info\n");
+    log_msg(LOG_WARN, "Test Warn\n");
+    log_msg(LOG_ERROR, "Test Error\n");
+    log_msg(LOG_DEBUG, "Test Debug (Alone)\n");
+
+    printf("\n");
+
+    log_msg(LOG_DEBUG | LOG_NONE, "Test Debug (None)\n");
+    log_msg(LOG_DEBUG | LOG_INFO, "Test Debug (Info)\n");
+    log_msg(LOG_DEBUG | LOG_WARN, "Test Debug (Warn)\n");
+    log_msg(LOG_DEBUG | LOG_ERROR, "Test Debug (Error)\n");
+    log_msg(LOG_DEBUG | LOG_DEBUG, "Test Debug (Debug)\n");
 
     printf("\n");
 
     printf("Deleting logger...\n");
-    delete_logger(logger);
+    logger_destroy();
     printf("Logger deleted\n");
 
     printf("\n");
 
+    printf("Done\n");
     return (0);
 }

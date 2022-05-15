@@ -14,6 +14,8 @@
     #define LIB_LOGGER_H_
 
     #include <stdbool.h>
+    #include <stdio.h>
+    #include <pthread.h>
 
     #define RESET           "\033[0m"
     #define BOLD(msg)       "\033[1m" msg RESET
@@ -30,23 +32,26 @@
     #define KO(msg) BOLD(RED(msg))
 
     typedef enum log_type_e {
-        LOG_NONE = 1,
-        LOG_INFO = 2,
-        LOG_WARN = 4,
-        LOG_ERROR = 8,
-        LOG_DEBUG = 16,
-        LOG_UNKNOWN = 32
+        LOG_NONE    = 0x01,
+        LOG_INFO    = 0x02,
+        LOG_WARN    = 0x04,
+        LOG_ERROR   = 0x08,
+        LOG_DEBUG   = 0x10,
+        LOG_UNKNOWN = 0x20
     } log_type_t;
 
     typedef struct logger_s {
         bool debug;
-        bool std_output;
-        int fd;
-        char *msg;
+        bool thread;
+        int fds_len;
+        FILE **fds;
+        pthread_mutex_t mutex;
     } logger_t;
 
-    logger_t *create_logger(bool std_output, bool file, char *file_path, bool debug);
-    void log_msg(logger_t *logger, log_type_t type, int wrote_bytes);
-    void delete_logger(logger_t *logger);
+    int logger_init(bool debug, bool thread, bool use_stdout);
+    void logger_destroy();
+    int logger_add_filename(char *file_name);
+    int logger_add_file(FILE *file);
+    void log_msg(log_type_t type, char *format, ...);
 
 #endif
