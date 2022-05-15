@@ -15,6 +15,8 @@
 
     #include "logger.h"
 
+    #define LOG_TIME_STR_LEN 21
+
     #define NULL_STR            ""
     #define INFO_STR            "[INFO] "
     #define WARN_STR            "[WARNING] "
@@ -29,7 +31,7 @@
     #define UNKNOWN_TYPE_STR_C  "[" BOLD(PURPLE("UNKNOWN TYPE")) "] "
 
     static char NULL_MSG[] = ERROR_STR "An error occur while building log message\n";
-    static char UNKNOWN_TIME[] = "[0001/01/01 00:00:00] ";
+    static char UNKNOWN_TIME[] = "[0001/01/01 00:00:00]";
 
     static const char *LOG_TYPE_PRINT[] = {NULL_STR, INFO_STR_C, WARN_STR_C, ERROR_STR_C, DEBUG_STR_C, UNKNOWN_TYPE_STR_C};
     static const char *LOG_TYPE_FILE[] = {NULL_STR, INFO_STR, WARN_STR, ERROR_STR, DEBUG_STR, UNKNOWN_TYPE_STR};
