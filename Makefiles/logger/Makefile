@@ -38,7 +38,7 @@ OUTPUT_DIR = $(LIB_DIR)/output
 
 SRC_DIR = 	$(LIB_DIR)/src/logger
 
-SRC	=	$(SRC_DIR)/init.c	\
+SRC	=	$(SRC_DIR)/manager.c	\
 		$(SRC_DIR)/print.c	\
 
 # ======= #
